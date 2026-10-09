@@ -2,10 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:wisata_app/core/core.dart';
+import 'package:wisata_app/data/datasources/auth_local_datasource.dart';
 import 'package:wisata_app/data/datasources/auth_remote_datasource.dart';
+import 'package:wisata_app/data/datasources/product_local_datasource.dart';
+import 'package:wisata_app/data/datasources/product_remote_datasource.dart';
 import 'package:wisata_app/data/wisata_api.dart';
 import 'package:wisata_app/ui/auth/bloc/login/login_bloc.dart';
 import 'package:wisata_app/ui/auth/splash_page.dart';
+import 'package:wisata_app/ui/home/bloc/checkout/checkout_bloc.dart';
+import 'package:wisata_app/ui/home/bloc/product/product_bloc.dart';
 
 final api = WisataApi();
 void main() {
@@ -14,8 +19,15 @@ void main() {
       providers: [
         BlocProvider(
           create: (_) =>
-              LoginBloc(AuthRemoteDatasource(api.dio), AuthLocalDataResource()),
+              LoginBloc(AuthRemoteDatasource(api.dio), AuthLocalDatasource()),
         ),
+        BlocProvider(
+          create: (_) => ProductBloc(
+            ProductRemoteDatasource(api.dio),
+            ProductLocalDatasource(),
+          )..add(ProductFetched()),
+        ),
+        BlocProvider(create: (_) => CheckoutBloc()),
       ],
       child: const MyApp(),
     ),

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:wisata_app/core/core.dart';
-import 'package:wisata_app/data/datasources/auth_remote_datasource.dart';
 import 'package:wisata_app/data/models/request/login_request_model.dart';
 import 'package:wisata_app/ui/auth/bloc/login/login_bloc.dart';
 import 'package:wisata_app/ui/home/main_page.dart';
@@ -96,12 +95,8 @@ class _LoginPageState extends State<LoginPage> {
                               },
                             );
                           },
-                          listener: (context, state) async {
+                          listener: (context, state) {
                             if (state is LoginSuccess) {
-                              await AuthLocalDataResource().saveToken(
-                                state.data.token ?? '',
-                              );
-                              if (!context.mounted) return;
                               context.pushReplacement(const MainPage());
                             } else if (state is LoginFailure) {
                               ScaffoldMessenger.of(context).showSnackBar(

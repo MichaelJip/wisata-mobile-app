@@ -1,6 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:meta/meta.dart';
 import 'package:wisata_app/core/utils/either.dart';
+import 'package:wisata_app/data/datasources/auth_local_datasource.dart';
 import 'package:wisata_app/data/datasources/auth_remote_datasource.dart';
 import 'package:wisata_app/data/models/request/login_request_model.dart';
 import 'package:wisata_app/data/models/response/login_response_model.dart';
@@ -17,12 +18,12 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
         case Left(:final value):
           emit(LoginFailure(value));
         case Right(:final value):
-          await _local.saveToken(value.token ?? '');
+          await _local.saveAuthData(value);
           emit(LoginSuccess(value));
       }
     });
   }
 
   final AuthRemoteDatasource _datasource;
-  final AuthLocalDataResource _local;
+  final AuthLocalDatasource _local;
 }

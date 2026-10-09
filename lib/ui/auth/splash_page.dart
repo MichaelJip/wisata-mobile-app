@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:wisata_app/core/core.dart';
-import 'package:wisata_app/data/datasources/auth_remote_datasource.dart';
+import 'package:wisata_app/data/datasources/auth_local_datasource.dart';
 import 'package:wisata_app/ui/auth/login_page.dart';
 import 'package:wisata_app/ui/home/main_page.dart';
 
@@ -20,11 +20,9 @@ class _SplashPageState extends State<SplashPage> {
 
   Future<void> _checkAuth() async {
     await Future.delayed(const Duration(seconds: 2));
-    final token = await AuthLocalDataResource().getToken();
+    final isLogin = await AuthLocalDatasource().isLogin();
     if (!mounted) return;
-    context.pushReplacement(
-      token != null && token.isNotEmpty ? const MainPage() : const LoginPage(),
-    );
+    context.pushReplacement(isLogin ? const MainPage() : const LoginPage());
   }
 
   @override
@@ -34,13 +32,6 @@ class _SplashPageState extends State<SplashPage> {
         padding: const EdgeInsets.all(96.0),
         child: Center(child: Assets.images.logoBlue.image()),
       ),
-      // bottomNavigationBar: SizedBox(
-      //   height: 100.0,
-      //   child: Align(
-      //     alignment: Alignment.center,
-      //     child: Assets.images.logoCwb.image(width: 96.0),
-      //   ),
-      // ),
     );
   }
 }
