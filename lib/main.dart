@@ -4,7 +4,6 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:wisata_app/core/core.dart';
 import 'package:wisata_app/data/datasources/auth_local_datasource.dart';
 import 'package:wisata_app/data/datasources/auth_remote_datasource.dart';
-import 'package:wisata_app/data/datasources/product_local_datasource.dart';
 import 'package:wisata_app/data/datasources/product_remote_datasource.dart';
 import 'package:wisata_app/data/wisata_api.dart';
 import 'package:wisata_app/ui/auth/bloc/login/login_bloc.dart';
@@ -22,10 +21,9 @@ void main() {
               LoginBloc(AuthRemoteDatasource(api.dio), AuthLocalDatasource()),
         ),
         BlocProvider(
-          create: (_) => ProductBloc(
-            ProductRemoteDatasource(api.dio),
-            ProductLocalDatasource(),
-          )..add(ProductFetched()),
+          create: (_) =>
+              ProductBloc(ProductRemoteDatasource(api.dio))
+                ..add(ProductFetched()),
         ),
         BlocProvider(create: (_) => CheckoutBloc()),
       ],

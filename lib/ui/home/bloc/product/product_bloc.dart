@@ -2,7 +2,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:meta/meta.dart';
 import 'package:wisata_app/core/utils/either.dart';
-import 'package:wisata_app/data/datasources/product_local_datasource.dart';
 import 'package:wisata_app/data/datasources/product_remote_datasource.dart';
 import 'package:wisata_app/data/models/response/product_response_model.dart';
 
@@ -10,14 +9,13 @@ part 'product_event.dart';
 part 'product_state.dart';
 
 class ProductBloc extends Bloc<ProductEvent, ProductState> {
-  ProductBloc(this._datasource, this._local) : super(const ProductState()) {
+  ProductBloc(this._datasource) : super(const ProductState()) {
     on<ProductFetched>(_onFetched, transformer: droppable());
     on<ProductSearched>(_onSearched, transformer: restartable());
     on<ProductRefreshed>(_onRefreshed, transformer: restartable());
   }
 
   final ProductRemoteDatasource _datasource;
-  final ProductLocalDatasource _local;
 
   Future<void> _onFetched(
     ProductFetched event,
@@ -45,9 +43,8 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
 
     switch (result) {
       case Left(:final value):
-        await _emitFailure(emit, value, page: 1);
+        emit(state.copyWith(status: ProductStatus.failure, message: value));
       case Right(:final value):
-        if (state.query.isEmpty) await _local.saveProductData(value.data ?? []);
         final meta = value.meta;
         emit(
           ProductState(
@@ -68,11 +65,8 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
     );
     switch (result) {
       case Left(:final value):
-        await _emitFailure(emit, value, page: state.page);
+        emit(state.copyWith(status: ProductStatus.failure, message: value));
       case Right(:final value):
-        if (state.page == 1 && state.query.isEmpty) {
-          await _local.saveProductData(value.data ?? []);
-        }
         final meta = value.meta;
         emit(
           state.copyWith(
@@ -83,28 +77,5 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
           ),
         );
     }
-  }
-
-  Future<void> _emitFailure(
-    Emitter<ProductState> emit,
-    String message, {
-    required int page,
-  }) async {
-    if (page == 1 && state.query.isEmpty) {
-      final cached = await _local.getProducts();
-      if (cached.isNotEmpty) {
-        emit(
-          ProductState(
-            status: ProductStatus.success,
-            products: cached,
-            hasReachedMax: true,
-            message: message,
-            isOffline: true,
-          ),
-        );
-        return;
-      }
-    }
-    emit(state.copyWith(status: ProductStatus.failure, message: message));
   }
 }
