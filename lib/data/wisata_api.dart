@@ -18,8 +18,9 @@ class WisataApi {
         onRequest: (options, handler) async {
           final token = await AuthLocalDatasource().getToken();
           if (token != null) options.headers['Authorization'] = 'Bearer $token';
-          if (kDebugMode)
+          if (kDebugMode) {
             debugPrint('API --> ${options.method} ${options.uri}');
+          }
           handler.next(options);
         },
         onResponse: (response, handler) {

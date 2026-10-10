@@ -10,6 +10,7 @@ class ProductRemoteDatasource {
 
   Future<Either<String, ProductResponseModel>> getProducts({
     int page = 1,
+    int? perPage,
     String keyword = '',
   }) async {
     try {
@@ -17,6 +18,7 @@ class ProductRemoteDatasource {
         '/product',
         queryParameters: {
           'page': page,
+          'per_page': ?perPage,
           if (keyword.isNotEmpty) 'keyword': keyword,
         },
       );
@@ -25,6 +27,29 @@ class ProductRemoteDatasource {
       return Left(dioErrorMessage(e));
     } catch (e) {
       return Left(e.toString());
+    }
+  }
+
+  Future<Either<String, List<ProductItem>>> getAllProducts({
+    int perPage = 100,
+  }) async {
+    final first = await getProducts(page: 1, perPage: perPage);
+    switch (first) {
+      case Left(:final value):
+        return Left(value);
+      case Right(:final value):
+        final items = [...?value.data];
+        final lastPage = value.meta?.lastPage ?? 1;
+        for (var page = 2; page <= lastPage; page++) {
+          final next = await getProducts(page: page, perPage: perPage);
+          switch (next) {
+            case Left(:final value):
+              return Left(value);
+            case Right(:final value):
+              items.addAll(value.data ?? []);
+          }
+        }
+        return Right(items);
     }
   }
 }
