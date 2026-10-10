@@ -91,6 +91,58 @@ class ProductItem {
     "category_id": categoryId,
     "category": category?.toMap(),
   };
+
+  factory ProductItem.fromLocalMap(Map<String, dynamic> json) => ProductItem(
+    id: json["productId"],
+    name: json["name"],
+    description: json["description"],
+    price: json["price"],
+    stock: json["stock"],
+    image: json["image"],
+    status: statusValues.map[json["status"]],
+    criteria: criteriaValues.map[json["criteria"]],
+    favorite: json["favorite"] == 1,
+    categoryId: json["category_id"],
+  );
+
+  ProductItem copyWith({
+    int? id,
+    String? name,
+    String? description,
+    int? price,
+    int? stock,
+    String? image,
+    Status? status,
+    Criteria? criteria,
+    bool? favorite,
+    int? categoryId,
+    Category? category,
+  }) => ProductItem(
+    id: id ?? this.id,
+    name: name ?? this.name,
+    description: description ?? this.description,
+    price: price ?? this.price,
+    stock: stock ?? this.stock,
+    image: image ?? this.image,
+    status: status ?? this.status,
+    criteria: criteria ?? this.criteria,
+    favorite: favorite ?? this.favorite,
+    categoryId: categoryId ?? this.categoryId,
+    category: category ?? this.category,
+  );
+
+  Map<String, dynamic> toLocalMap() => {
+    "productId": id,
+    "name": name,
+    "description": description,
+    "price": price,
+    "stock": stock,
+    "image": image,
+    "status": statusValues.reverse[status],
+    "criteria": criteriaValues.reverse[criteria],
+    "favorite": favorite == true ? 1 : 0,
+    "category_id": categoryId,
+  };
 }
 
 class Category {

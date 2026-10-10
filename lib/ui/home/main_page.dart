@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:wisata_app/core/core.dart';
+import 'package:wisata_app/ui/home/bloc/product/product_bloc.dart';
 import 'package:wisata_app/ui/home/pages/order_page.dart';
 import 'package:wisata_app/ui/widgets/nav_item.dart';
 
@@ -30,6 +32,23 @@ class _MainPageState extends State<MainPage> {
 
   @override
   Widget build(BuildContext context) {
+    return BlocListener<ProductBloc, ProductState>(
+      // hanya saat sync BARU SAJA selesai dengan sukses
+      listenWhen: (prev, curr) =>
+          prev.isSyncing &&
+          !curr.isSyncing &&
+          !curr.isOffline &&
+          curr.status == ProductStatus.success,
+      listener: (context, state) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Produk berhasil diperbarui otomatis')),
+        );
+      },
+      child: _buildScaffold(context),
+    );
+  }
+
+  Widget _buildScaffold(BuildContext context) {
     return Scaffold(
       resizeToAvoidBottomInset: false,
       body: _pages[_selectedIndex],

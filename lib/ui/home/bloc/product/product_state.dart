@@ -12,6 +12,7 @@ final class ProductState {
     this.hasReachedMax = false,
     this.message,
     this.isOffline = false,
+    this.isSyncing = false,
   });
 
   final ProductStatus status;
@@ -21,6 +22,7 @@ final class ProductState {
   final bool hasReachedMax;
   final String? message;
   final bool isOffline;
+  final bool isSyncing;
 
   ProductState copyWith({
     ProductStatus? status,
@@ -30,6 +32,7 @@ final class ProductState {
     bool? hasReachedMax,
     String? message,
     bool? isOffline,
+    bool? isSyncing,
   }) => ProductState(
     status: status ?? this.status,
     products: products ?? this.products,
@@ -38,6 +41,7 @@ final class ProductState {
     hasReachedMax: hasReachedMax ?? this.hasReachedMax,
     message: message ?? this.message,
     isOffline: isOffline ?? this.isOffline,
+    isSyncing: isSyncing ?? this.isSyncing,
   );
 }
 

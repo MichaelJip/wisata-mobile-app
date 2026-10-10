@@ -14,27 +14,9 @@ class OrderPage extends StatefulWidget {
 }
 
 class _OrderPageState extends State<OrderPage> {
-  final _controller = ScrollController();
-  @override
-  void initState() {
-    super.initState();
-    _controller.addListener(() {
-      if (_controller.position.pixels >=
-          _controller.position.maxScrollExtent - 200) {
-        context.read<ProductBloc>().add(ProductFetched());
-      }
-    });
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
   Future<void> _refresh() {
     final bloc = context.read<ProductBloc>();
-    bloc.add(ProductRefreshed());
+    bloc.add(ProductSynced());
     return bloc.stream.first;
   }
 
@@ -70,17 +52,7 @@ class _OrderPageState extends State<OrderPage> {
                   ),
                 );
               }
-              return Padding(
-                padding: const EdgeInsetsGeometry.fromLTRB(20, 8, 20, 8),
-                child: TextField(
-                  decoration: const InputDecoration(
-                    hintText: 'Search',
-                    prefixIcon: Icon(Icons.search),
-                  ),
-                  onChanged: (value) =>
-                      context.read<ProductBloc>().add(ProductSearched(value)),
-                ),
-              );
+              return const SizedBox.shrink();
             },
           ),
           Expanded(
@@ -108,7 +80,7 @@ class _OrderPageState extends State<OrderPage> {
                                 ElevatedButton(
                                   onPressed: () => context
                                       .read<ProductBloc>()
-                                      .add(ProductRefreshed()),
+                                      .add(ProductSynced()),
                                   child: const Text("Coba lagi"),
                                 ),
                               ],
@@ -123,19 +95,11 @@ class _OrderPageState extends State<OrderPage> {
                 return RefreshIndicator(
                   onRefresh: _refresh,
                   child: ListView.builder(
-                    controller: _controller,
+                    physics: const AlwaysScrollableScrollPhysics(),
                     padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                    itemCount:
-                        state.products.length + (state.hasReachedMax ? 0 : 1),
-                    itemBuilder: (context, index) {
-                      if (index >= state.products.length) {
-                        return const Padding(
-                          padding: EdgeInsets.all(16),
-                          child: Center(child: CircularProgressIndicator()),
-                        );
-                      }
-                      return OrderCard(item: state.products[index]);
-                    },
+                    itemCount: state.products.length,
+                    itemBuilder: (context, index) =>
+                        OrderCard(item: state.products[index]),
                   ),
                 );
               },
