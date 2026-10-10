@@ -10,6 +10,7 @@ import 'package:wisata_app/data/wisata_api.dart';
 import 'package:wisata_app/ui/auth/bloc/login/login_bloc.dart';
 import 'package:wisata_app/ui/auth/splash_page.dart';
 import 'package:wisata_app/ui/home/bloc/checkout/checkout_bloc.dart';
+import 'package:wisata_app/ui/home/bloc/order/order_bloc.dart';
 import 'package:wisata_app/ui/home/bloc/product/product_bloc.dart';
 
 final api = WisataApi();
@@ -31,6 +32,10 @@ void main() {
                 ..add(ProductSynced()),
         ),
         BlocProvider(create: (_) => CheckoutBloc()),
+        BlocProvider(
+          create: (_) =>
+              OrderBloc(ProductLocalDatasource(), AuthLocalDatasource()),
+        ),
       ],
       child: const MyApp(),
     ),

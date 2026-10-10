@@ -27,8 +27,6 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
   bool _isOnline(List<ConnectivityResult> results) =>
       !results.contains(ConnectivityResult.none);
 
-  // Sync otomatis saat koneksi berubah dari mati -> hidup,
-  // walaupun app sudah terbuka sebelumnya.
   Future<void> _watchConnectivity() async {
     final connectivity = Connectivity();
     var wasOnline = _isOnline(await connectivity.checkConnectivity());

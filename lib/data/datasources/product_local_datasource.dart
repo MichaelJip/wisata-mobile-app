@@ -1,4 +1,5 @@
 import 'package:sqflite/sqflite.dart';
+import 'package:wisata_app/data/models/order_model.dart';
 import 'package:wisata_app/data/models/response/product_response_model.dart';
 
 class ProductLocalDatasource {
@@ -11,7 +12,7 @@ class ProductLocalDatasource {
 
   Future<Database> get _database async => _db ??= await openDatabase(
     '${await getDatabasesPath()}/wisata.db',
-    version: 1,
+    version: 2,
     onCreate: (db, version) async {
       await db.execute('''
       CREATE TABLE $_product (
@@ -35,32 +36,44 @@ class ProductLocalDatasource {
         name TEXT NOT NULL
       )
       ''');
-      await db.execute('''
-        CREATE TABLE $_orders (
-          id INTEGER PRIMARY KEY AUTOINCREMENT,
-          nominal INTEGER,
-          payment_method TEXT,
-          payment_amount INTEGER,
-          total_price INTEGER,
-          total_item INTEGER,
-          cashier_id INTEGER,
-          cashier_name TEXT,
-          transaction_item TEXT,
-          is_sync INTEGER DEFAULT 0
-        )
-      ''');
-      await db.execute('''
-        CREATE TABLE $_orderItems (
-          id INTEGER PRIMARY KEY AUTOINCREMENT,
-          order_id INTEGER,
-          product_id INTEGER,
-          product_name TEXT,
-          quantity INTEGER,
-          price INTEGER
-        )
-      ''');
+      await _createOrderTables(db);
+    },
+    // v2: kolom tabel orders disamakan dengan OrderModel.toMapForLocal().
+    // Tabel order lama dibuang karena belum ada data yang perlu dipertahankan.
+    onUpgrade: (db, oldVersion, newVersion) async {
+      if (oldVersion < 2) {
+        await db.execute('DROP TABLE IF EXISTS $_orderItems');
+        await db.execute('DROP TABLE IF EXISTS $_orders');
+        await _createOrderTables(db);
+      }
     },
   );
+
+  Future<void> _createOrderTables(Database db) async {
+    await db.execute('''
+      CREATE TABLE $_orders (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        payment_method TEXT,
+        nominal_payment INTEGER,
+        total_price INTEGER,
+        total_item INTEGER,
+        cashier_id INTEGER,
+        cashier_name TEXT,
+        transaction_time TEXT,
+        is_sync INTEGER DEFAULT 0
+      )
+    ''');
+    await db.execute('''
+      CREATE TABLE $_orderItems (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        order_id INTEGER,
+        product_id INTEGER,
+        product_name TEXT,
+        quantity INTEGER,
+        price INTEGER
+      )
+    ''');
+  }
 
   Future<void> init() async {
     await _database;
@@ -116,5 +129,26 @@ class ProductLocalDatasource {
       return ProductItem.fromLocalMap(productMap)
           .copyWith(category: Category.fromMap(categoryMap));
     });
+  }
+
+  //save order
+  Future<int> insertOder(OrderModel order) async {
+    final db = await _database;
+    // Transaction: order dan item-nya tersimpan semua atau batal semua.
+    return db.transaction((txn) async {
+      final id = await txn.insert(_orders, order.toMapForLocal());
+      for (final item in order.orders) {
+        await txn.insert(_orderItems, item.toMapForLocal(id));
+      }
+      return id;
+    });
+  }
+
+  // get all order
+  Future<List<OrderModel>> getAllOrder() async {
+    final db = await _database;
+    final result = await db.query('orders', orderBy: 'id DESC');
+
+    return result.map((e) => OrderModel.fromLocalMap(e)).toList();
   }
 }

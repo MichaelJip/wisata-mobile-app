@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:wisata_app/core/core.dart';
+import 'package:wisata_app/data/datasources/auth_local_datasource.dart';
+import 'package:wisata_app/ui/auth/login_page.dart';
 import 'package:wisata_app/ui/home/bloc/product/product_bloc.dart';
 import 'package:wisata_app/ui/home/pages/order_page.dart';
 import 'package:wisata_app/ui/widgets/nav_item.dart';
@@ -14,11 +16,14 @@ class MainPage extends StatefulWidget {
 
 class _MainPageState extends State<MainPage> {
   int _selectedIndex = 0;
-  final _pages = [
+
+  List<Widget> get _pages => [
     const OrderPage(),
     const Text('Ticket'),
     const Text('History'),
-    const Text('Setting'),
+    Center(
+      child: Button.filled(onPressed: _logout, label: "Logout"),
+    ),
     // const TicketPage(),
     // const HistoryPage(),
     // const SettingPage(),
@@ -30,10 +35,15 @@ class _MainPageState extends State<MainPage> {
     });
   }
 
+  Future<void> _logout() async {
+    await AuthLocalDatasource().removeAuthData();
+    if (!mounted) return;
+    context.pushAndRemoveUntil(const LoginPage(), (route) => false);
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocListener<ProductBloc, ProductState>(
-      // hanya saat sync BARU SAJA selesai dengan sukses
       listenWhen: (prev, curr) =>
           prev.isSyncing &&
           !curr.isSyncing &&
