@@ -3,12 +3,14 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:wisata_app/core/core.dart';
 import 'package:wisata_app/data/datasources/auth_local_datasource.dart';
 import 'package:wisata_app/ui/auth/login_page.dart';
+import 'package:wisata_app/ui/home/bloc/history/history_bloc.dart';
 import 'package:wisata_app/ui/home/bloc/product/product_bloc.dart';
+import 'package:wisata_app/ui/home/pages/history_page.dart';
 import 'package:wisata_app/ui/home/pages/order_page.dart';
 import 'package:wisata_app/ui/widgets/nav_item.dart';
 
 class MainPage extends StatefulWidget {
-  const new({super.key});
+  const MainPage({super.key});
 
   @override
   State<MainPage> createState() => _MainPageState();
@@ -20,18 +22,18 @@ class _MainPageState extends State<MainPage> {
   List<Widget> get _pages => [
     const OrderPage(),
     const Text('Ticket'),
-    const Text('History'),
+    const HistoryPage(),
     Center(
       child: Button.filled(onPressed: _logout, label: "Logout"),
     ),
     // const TicketPage(),
-    // const HistoryPage(),
     // const SettingPage(),
   ];
 
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
+      if (index == 2) context.read<HistoryBloc>().add(HistoryFetched());
     });
   }
 
@@ -77,35 +79,38 @@ class _MainPageState extends State<MainPage> {
             ),
           ],
         ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            NavItem(
-              iconPath: Assets.icons.nav.home.path,
-              label: 'Home',
-              isActive: _selectedIndex == 0,
-              onTap: () => _onItemTapped(0),
-            ),
-            NavItem(
-              iconPath: Assets.icons.nav.ticket.path,
-              label: 'Ticket',
-              isActive: _selectedIndex == 1,
-              onTap: () => _onItemTapped(1),
-            ),
-            const SpaceWidth(10.0),
-            NavItem(
-              iconPath: Assets.icons.nav.history.path,
-              label: 'History',
-              isActive: _selectedIndex == 2,
-              onTap: () => _onItemTapped(2),
-            ),
-            NavItem(
-              iconPath: Assets.icons.nav.setting.path,
-              label: 'Setting',
-              isActive: _selectedIndex == 3,
-              onTap: () => _onItemTapped(3),
-            ),
-          ],
+        child: SafeArea(
+          top: false,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              NavItem(
+                iconPath: Assets.icons.nav.home.path,
+                label: 'Home',
+                isActive: _selectedIndex == 0,
+                onTap: () => _onItemTapped(0),
+              ),
+              NavItem(
+                iconPath: Assets.icons.nav.ticket.path,
+                label: 'Ticket',
+                isActive: _selectedIndex == 1,
+                onTap: () => _onItemTapped(1),
+              ),
+              const SpaceWidth(10.0),
+              NavItem(
+                iconPath: Assets.icons.nav.history.path,
+                label: 'History',
+                isActive: _selectedIndex == 2,
+                onTap: () => _onItemTapped(2),
+              ),
+              NavItem(
+                iconPath: Assets.icons.nav.setting.path,
+                label: 'Setting',
+                isActive: _selectedIndex == 3,
+                onTap: () => _onItemTapped(3),
+              ),
+            ],
+          ),
         ),
       ),
       floatingActionButton: GestureDetector(

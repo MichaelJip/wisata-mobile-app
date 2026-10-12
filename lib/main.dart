@@ -10,6 +10,7 @@ import 'package:wisata_app/data/wisata_api.dart';
 import 'package:wisata_app/ui/auth/bloc/login/login_bloc.dart';
 import 'package:wisata_app/ui/auth/splash_page.dart';
 import 'package:wisata_app/ui/home/bloc/checkout/checkout_bloc.dart';
+import 'package:wisata_app/ui/home/bloc/history/history_bloc.dart';
 import 'package:wisata_app/ui/home/bloc/order/order_bloc.dart';
 import 'package:wisata_app/ui/home/bloc/product/product_bloc.dart';
 
@@ -36,6 +37,7 @@ void main() {
           create: (_) =>
               OrderBloc(ProductLocalDatasource(), AuthLocalDatasource()),
         ),
+        BlocProvider(create: (_) => HistoryBloc(ProductLocalDatasource())),
       ],
       child: const MyApp(),
     ),
