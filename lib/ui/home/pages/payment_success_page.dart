@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:print_bluetooth_thermal/print_bluetooth_thermal.dart';
 import 'package:qr_flutter/qr_flutter.dart';
+import 'package:wisata_app/data/dataoutputs/transaction_print.dart';
 import 'package:wisata_app/ui/home/bloc/order/order_bloc.dart';
+import 'package:wisata_app/ui/home/main_page.dart';
 
 import '../../../core/core.dart';
 
@@ -17,7 +20,7 @@ class PaymentSuccessPage extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: AppColors.primary,
         title: const Text(
-          'Payment Reciept',
+          'Payment Receipt',
           style: TextStyle(color: AppColors.white),
         ),
         leading: GestureDetector(
@@ -51,7 +54,7 @@ class PaymentSuccessPage extends StatelessWidget {
               child: Column(
                 children: [
                   const Text(
-                    'PAYMENT RECIEPT',
+                    'PAYMENT RECEIPT',
                     style: TextStyle(
                       fontSize: 18.0,
                       fontWeight: FontWeight.bold,
@@ -103,7 +106,22 @@ class PaymentSuccessPage extends StatelessWidget {
       floatingActionButton: Padding(
         padding: const EdgeInsets.fromLTRB(36, 0, 36, 20),
         child: Button.filled(
-          onPressed: () {},
+          onPressed: () async {
+            final connected = await PrintBluetoothThermal.connectionStatus;
+            if (!connected) {
+              if (!context.mounted) return;
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text("Printer belum terhubung")),
+              );
+              return;
+            }
+            final bytes = await TransactionPrint.instance.printQRCode(
+              order.id.toString() + order.transactionTime,
+            );
+            await PrintBluetoothThermal.writeBytes(bytes);
+            if (!context.mounted) return;
+            context.pushReplacement(const MainPage());
+          },
           label: 'Cetak Transaksi',
           borderRadius: 10.0,
         ),

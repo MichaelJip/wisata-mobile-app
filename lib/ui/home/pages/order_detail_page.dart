@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:wisata_app/ui/home/bloc/checkout/checkout_bloc.dart';
+import 'package:wisata_app/ui/home/dialogs/payment_qris_dialog.dart';
 import 'package:wisata_app/ui/home/dialogs/payment_tunai_dialog.dart';
 import 'package:wisata_app/ui/widgets/order_detail_card.dart';
 import 'package:wisata_app/ui/widgets/payment_method_button.dart';
@@ -109,10 +110,13 @@ class OrderDetailPage extends StatelessWidget {
                       child: Button.filled(
                         onPressed: () {
                           if (paymentButtonIndex == 0) {
-                            // showDialog(
-                            //   context: context,
-                            //   builder: (context) => const PaymentQrisDialog(),
-                            // );
+                            showDialog(
+                              context: context,
+                              barrierDismissible: false,
+                              builder: (context) => PaymentQrisDialog(
+                                totalPrice: checkout.totalPrice,
+                              ),
+                            );
                           } else if (paymentButtonIndex == 1) {
                             showDialog(
                               context: context,

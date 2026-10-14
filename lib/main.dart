@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:wisata_app/core/core.dart';
 import 'package:wisata_app/data/datasources/auth_local_datasource.dart';
 import 'package:wisata_app/data/datasources/auth_remote_datasource.dart';
+import 'package:wisata_app/data/datasources/midtrans_remote_datasource.dart';
 import 'package:wisata_app/data/datasources/product_local_datasource.dart';
 import 'package:wisata_app/data/datasources/product_remote_datasource.dart';
 import 'package:wisata_app/data/wisata_api.dart';
@@ -13,6 +14,7 @@ import 'package:wisata_app/ui/home/bloc/checkout/checkout_bloc.dart';
 import 'package:wisata_app/ui/home/bloc/history/history_bloc.dart';
 import 'package:wisata_app/ui/home/bloc/order/order_bloc.dart';
 import 'package:wisata_app/ui/home/bloc/product/product_bloc.dart';
+import 'package:wisata_app/ui/home/bloc/qris/qris_bloc.dart';
 
 final api = WisataApi();
 void main() {
@@ -38,6 +40,7 @@ void main() {
               OrderBloc(ProductLocalDatasource(), AuthLocalDatasource()),
         ),
         BlocProvider(create: (_) => HistoryBloc(ProductLocalDatasource())),
+        BlocProvider(create: (_) => QrisBloc(MidtransRemoteDatasource())),
       ],
       child: const MyApp(),
     ),
