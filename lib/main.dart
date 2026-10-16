@@ -8,6 +8,7 @@ import 'package:wisata_app/data/datasources/auth_remote_datasource.dart';
 import 'package:wisata_app/data/datasources/category_local_datasource.dart';
 import 'package:wisata_app/data/datasources/category_remote_datasource.dart';
 import 'package:wisata_app/data/datasources/midtrans_remote_datasource.dart';
+import 'package:wisata_app/data/datasources/order_remote_datasource.dart';
 import 'package:wisata_app/data/datasources/product_local_datasource.dart';
 import 'package:wisata_app/data/datasources/product_remote_datasource.dart';
 import 'package:wisata_app/data/wisata_api.dart';
@@ -50,7 +51,11 @@ void main() {
         BlocProvider(create: (_) => CheckoutBloc()),
         BlocProvider(
           create: (_) =>
-              OrderBloc(ProductLocalDatasource(), AuthLocalDatasource()),
+              OrderBloc(
+                ProductLocalDatasource(),
+                AuthLocalDatasource(),
+                OrderRemoteDatasource(api.dio),
+              ),
         ),
         BlocProvider(create: (_) => HistoryBloc(ProductLocalDatasource())),
         BlocProvider(create: (_) => QrisBloc(MidtransRemoteDatasource())),

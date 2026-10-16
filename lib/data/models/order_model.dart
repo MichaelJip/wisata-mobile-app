@@ -52,6 +52,25 @@ class OrderModel {
     };
   }
 
+  Map<String, dynamic> toRemoteMap() {
+    String two(int n) => n.toString().padLeft(2, '0');
+    final t = DateTime.tryParse(transactionTime);
+    final time = t == null
+        ? transactionTime
+        : '${t.year}-${two(t.month)}-${two(t.day)} '
+              '${two(t.hour)}:${two(t.minute)}:${two(t.second)}';
+    return <String, dynamic>{
+      'transaction_time': time,
+      'total_price': totalPrice,
+      'total_item': totalQuantity,
+      'payment_amount': nominalPayment,
+      'cashier_id': cashierId,
+      'cashier_name': cashierName,
+      'payment_method': paymentMethod,
+      'order_items': orders.map((x) => x.toRemoteMap()).toList(),
+    };
+  }
+
   factory OrderModel.fromLocalMap(Map<String, dynamic> map) {
     return OrderModel(
       id: map['id'] != null ? map['id'] as int : null,

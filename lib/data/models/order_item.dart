@@ -33,6 +33,14 @@ class OrderItem {
     };
   }
 
+  Map<String, dynamic> toRemoteMap() {
+    return <String, dynamic>{
+      'product_id': product.id,
+      'quantity': quantity,
+      'total_price': (product.price ?? 0) * quantity,
+    };
+  }
+
   factory OrderItem.fromMap(Map<String, dynamic> map) {
     return OrderItem(
       product: ProductItem.fromMap(map['product'] as Map<String, dynamic>),

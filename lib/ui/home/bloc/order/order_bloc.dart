@@ -1,7 +1,9 @@
 import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:meta/meta.dart';
+import 'package:wisata_app/core/utils/either.dart';
 import 'package:wisata_app/data/datasources/auth_local_datasource.dart';
+import 'package:wisata_app/data/datasources/order_remote_datasource.dart';
 import 'package:wisata_app/data/datasources/product_local_datasource.dart';
 import 'package:wisata_app/data/models/order_item.dart';
 import 'package:wisata_app/data/models/order_model.dart';
@@ -10,11 +12,13 @@ part 'order_event.dart';
 part 'order_state.dart';
 
 class OrderBloc extends Bloc<OrderEvent, OrderState> {
-  OrderBloc(this._local, this._auth) : super(const OrderState()) {
+  OrderBloc(this._local, this._auth, this._remote) : super(const OrderState()) {
     on<OrderSubmitted>(_onSubmitted, transformer: droppable());
     on<OrderLocalFetched>(_onLocalFetched, transformer: restartable());
+    on<OrderSynced>(_onSynced, transformer: droppable());
   }
 
+  final OrderRemoteDatasource _remote;
   final ProductLocalDatasource _local;
   final AuthLocalDatasource _auth;
 
@@ -79,6 +83,35 @@ class OrderBloc extends Bloc<OrderEvent, OrderState> {
       );
     } catch (e) {
       emit(state.copyWith(status: OrderStatus.failure, message: '$e'));
+    }
+  }
+
+  Future<void> _onSynced(OrderSynced event, Emitter<OrderState> emit) async {
+    emit(state.copyWith(isSyncing: true, failedSyncCount: 0));
+
+    var failed = 0;
+    try {
+      final pending = await _local.getUnsyncedOrders();
+      for (final order in pending) {
+        final result = await _remote.postOrder(order);
+        switch (result) {
+          case Left():
+            failed++;
+          case Right():
+            await _local.markOrderSynced(order.id!);
+        }
+      }
+      emit(
+        state.copyWith(
+          isSyncing: false,
+          failedSyncCount: failed,
+          orders: await _local.getAllOrder(),
+        ),
+      );
+    } catch (e) {
+      emit(
+        state.copyWith(isSyncing: false, failedSyncCount: failed, message: '$e'),
+      );
     }
   }
 

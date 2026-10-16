@@ -16,3 +16,5 @@ final class OrderSubmitted extends OrderEvent {
 }
 
 final class OrderLocalFetched extends OrderEvent {}
+
+final class OrderSynced extends OrderEvent {}

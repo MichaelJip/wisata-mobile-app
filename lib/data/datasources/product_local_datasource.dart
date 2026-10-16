@@ -1,5 +1,6 @@
 import 'package:sqflite/sqflite.dart';
 import 'package:wisata_app/data/datasources/app_database.dart';
+import 'package:wisata_app/data/models/order_item.dart';
 import 'package:wisata_app/data/models/order_model.dart';
 import 'package:wisata_app/data/models/response/product_response_model.dart';
 
@@ -73,5 +74,57 @@ class ProductLocalDatasource {
     final result = await db.query('orders', orderBy: 'id DESC');
 
     return result.map((e) => OrderModel.fromLocalMap(e)).toList();
+  }
+
+  // get orders not yet posted to server, including their items
+  Future<List<OrderModel>> getUnsyncedOrders() async {
+    final db = await _database;
+    final rows = await db.query(
+      _orders,
+      where: 'is_sync = 0',
+      orderBy: 'id ASC',
+    );
+
+    final orders = <OrderModel>[];
+    for (final row in rows) {
+      final order = OrderModel.fromLocalMap(row);
+      final itemRows = await db.query(
+        _orderItems,
+        where: 'order_id = ?',
+        whereArgs: [order.id],
+      );
+      final items = itemRows
+          .map(
+            (e) => OrderItem(
+              product: ProductItem(
+                id: e['product_id'] as int?,
+                name: e['product_name'] as String?,
+                price: e['price'] as int?,
+              ),
+              quantity: e['quantity'] as int,
+            ),
+          )
+          .toList();
+      orders.add(
+        OrderModel(
+          id: order.id,
+          paymentMethod: order.paymentMethod,
+          nominalPayment: order.nominalPayment,
+          orders: items,
+          totalQuantity: order.totalQuantity,
+          totalPrice: order.totalPrice,
+          cashierId: order.cashierId,
+          cashierName: order.cashierName,
+          transactionTime: order.transactionTime,
+          isSync: order.isSync,
+        ),
+      );
+    }
+    return orders;
+  }
+
+  Future<void> markOrderSynced(int id) async {
+    final db = await _database;
+    await db.update(_orders, {'is_sync': 1}, where: 'id = ?', whereArgs: [id]);
   }
 }

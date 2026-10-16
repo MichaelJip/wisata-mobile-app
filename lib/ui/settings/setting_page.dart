@@ -4,6 +4,7 @@ import 'package:wisata_app/core/core.dart';
 import 'package:wisata_app/data/datasources/auth_local_datasource.dart';
 import 'package:wisata_app/ui/auth/login_page.dart';
 import 'package:wisata_app/ui/home/bloc/category/category_bloc.dart';
+import 'package:wisata_app/ui/home/bloc/order/order_bloc.dart';
 import 'package:wisata_app/ui/home/bloc/product/product_bloc.dart';
 import 'package:wisata_app/ui/settings/setting_printer_page.dart';
 import 'package:wisata_app/ui/widgets/setting_button.dart';
@@ -26,6 +27,13 @@ class _SettingPageState extends State<SettingPage> {
 
     final categoryBloc = context.read<CategoryBloc>();
     final productBloc = context.read<ProductBloc>();
+    final orderBloc = context.read<OrderBloc>();
+
+    final orderDone = orderBloc.stream.firstWhere(
+      (element) => !element.isSyncing,
+    );
+    orderBloc.add(OrderSynced());
+    final orderResult = await orderDone;
 
     final categoryDone = categoryBloc.stream.firstWhere(
       (element) => !element.isSyncing,
@@ -45,6 +53,11 @@ class _SettingPageState extends State<SettingPage> {
     });
     if (result.isOffline) {
       AppToast.error(context, 'Gagal sync, mode offline');
+    } else if (orderResult.failedSyncCount > 0) {
+      AppToast.error(
+        context,
+        '${orderResult.failedSyncCount} order gagal dikirim',
+      );
     } else {
       AppToast.success(context, 'Sync selesai');
     }
