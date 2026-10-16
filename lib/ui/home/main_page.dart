@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:wisata_app/core/core.dart';
-import 'package:wisata_app/data/datasources/auth_local_datasource.dart';
-import 'package:wisata_app/ui/auth/login_page.dart';
 import 'package:wisata_app/ui/home/bloc/history/history_bloc.dart';
 import 'package:wisata_app/ui/home/bloc/product/product_bloc.dart';
 import 'package:wisata_app/ui/home/pages/history_page.dart';
 import 'package:wisata_app/ui/home/pages/order_page.dart';
+import 'package:wisata_app/ui/home/pages/ticket_page.dart';
+import 'package:wisata_app/ui/settings/setting_page.dart';
 import 'package:wisata_app/ui/widgets/nav_item.dart';
 
 class MainPage extends StatefulWidget {
@@ -21,13 +21,9 @@ class _MainPageState extends State<MainPage> {
 
   List<Widget> get _pages => [
     const OrderPage(),
-    const Text('Ticket'),
+    const TicketPage(),
     const HistoryPage(),
-    Center(
-      child: Button.filled(onPressed: _logout, label: "Logout"),
-    ),
-    // const TicketPage(),
-    // const SettingPage(),
+    const SettingPage(),
   ];
 
   void _onItemTapped(int index) {
@@ -35,12 +31,6 @@ class _MainPageState extends State<MainPage> {
       _selectedIndex = index;
       if (index == 2) context.read<HistoryBloc>().add(HistoryFetched());
     });
-  }
-
-  Future<void> _logout() async {
-    await AuthLocalDatasource().removeAuthData();
-    if (!mounted) return;
-    context.pushAndRemoveUntil(const LoginPage(), (route) => false);
   }
 
   @override
@@ -52,9 +42,7 @@ class _MainPageState extends State<MainPage> {
           !curr.isOffline &&
           curr.status == ProductStatus.success,
       listener: (context, state) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Produk berhasil diperbarui otomatis')),
-        );
+        AppToast.success(context, 'Produk berhasil diperbarui otomatis');
       },
       child: _buildScaffold(context),
     );

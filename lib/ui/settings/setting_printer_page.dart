@@ -57,6 +57,7 @@ class _SettingPrinterPageState extends State<SettingPrinterPage> {
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
+              spacing: 10,
               children: [
                 MenuPrinterButton(
                   label: 'Search',

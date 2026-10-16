@@ -26,7 +26,8 @@ extension NavigatorExt on BuildContext {
   }
 
   Future<T?> pushReplacement<T extends Object, TO extends Object>(
-      Widget widget) async {
+    Widget widget,
+  ) async {
     return Navigator.pushReplacement<T, TO>(
       this,
       MaterialPageRoute(builder: (context) => widget),
@@ -34,7 +35,9 @@ extension NavigatorExt on BuildContext {
   }
 
   Future<T?> pushAndRemoveUntil<T extends Object>(
-      Widget widget, bool Function(Route<dynamic> route) predicate) async {
+    Widget widget,
+    bool Function(Route<dynamic> route) predicate,
+  ) async {
     return Navigator.pushAndRemoveUntil<T>(
       this,
       MaterialPageRoute(builder: (context) => widget),

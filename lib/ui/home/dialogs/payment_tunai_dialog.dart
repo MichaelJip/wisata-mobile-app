@@ -40,9 +40,7 @@ class _PaymentTunaiDialogState extends State<PaymentTunaiDialog> {
           context.read<CheckoutBloc>().add(CheckoutCleared());
           context.pushReplacement(const PaymentSuccessPage());
         } else if (state.status == OrderStatus.failure) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(state.message ?? 'Gagal menyimpan order')),
-          );
+          AppToast.error(context, state.message ?? 'Gagal menyimpan order');
         }
       },
       child: AlertDialog(

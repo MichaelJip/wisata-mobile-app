@@ -99,9 +99,7 @@ class _LoginPageState extends State<LoginPage> {
                             if (state is LoginSuccess) {
                               context.pushReplacement(const MainPage());
                             } else if (state is LoginFailure) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text(state.message)),
-                              );
+                              AppToast.error(context, state.message);
                             }
                           },
                         ),

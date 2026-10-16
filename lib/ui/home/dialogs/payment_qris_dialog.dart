@@ -31,10 +31,8 @@ class _PaymentQrisDialogState extends State<PaymentQrisDialog> {
   }
 
   // URL gambar QR dari actions Midtrans ("generate-qr-code").
-  String? _qrImageUrl(QrisResponseModel data) => data.actions
-      ?.where((a) => a.name == 'generate-qr-code')
-      .firstOrNull
-      ?.url;
+  String? _qrImageUrl(QrisResponseModel data) =>
+      data.actions?.where((a) => a.name == 'generate-qr-code').firstOrNull?.url;
 
   void _generate() {
     context.read<QrisBloc>().add(GenerateQris(orderId, widget.totalPrice));
@@ -73,11 +71,7 @@ class _PaymentQrisDialogState extends State<PaymentQrisDialog> {
               context.read<CheckoutBloc>().add(CheckoutCleared());
               context.pushReplacement(const PaymentSuccessPage());
             } else if (state.status == OrderStatus.failure) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(state.message ?? 'Gagal menyimpan order'),
-                ),
-              );
+              AppToast.error(context, state.message ?? 'Gagal menyimpan order');
             }
           },
         ),

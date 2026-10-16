@@ -110,9 +110,7 @@ class PaymentSuccessPage extends StatelessWidget {
             final connected = await PrintBluetoothThermal.connectionStatus;
             if (!connected) {
               if (!context.mounted) return;
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text("Printer belum terhubung")),
-              );
+              AppToast.error(context, "Printer belum terhubung");
               return;
             }
             final bytes = await TransactionPrint.instance.printQRCode(

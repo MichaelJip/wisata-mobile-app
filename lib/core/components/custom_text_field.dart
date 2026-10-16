@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import 'spaces.dart';
 
@@ -13,6 +14,7 @@ class CustomTextField extends StatelessWidget {
   final Widget? suffixIcon;
   final bool readOnly;
   final bool isOutlineBorder;
+  final List<TextInputFormatter>? inputFormatters;
 
   const CustomTextField({
     super.key,
@@ -26,6 +28,7 @@ class CustomTextField extends StatelessWidget {
     this.suffixIcon,
     this.readOnly = false,
     this.isOutlineBorder = true,
+    this.inputFormatters,
   });
 
   @override
@@ -36,10 +39,7 @@ class CustomTextField extends StatelessWidget {
         if (showLabel) ...[
           Text(
             label,
-            style: const TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w700,
-            ),
+            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
           ),
           const SpaceHeight(12.0),
         ],
@@ -48,6 +48,7 @@ class CustomTextField extends StatelessWidget {
           onChanged: onChanged,
           obscureText: obscureText,
           keyboardType: keyboardType,
+          inputFormatters: inputFormatters,
           readOnly: readOnly,
           decoration: InputDecoration(
             prefixIcon: prefixIcon,

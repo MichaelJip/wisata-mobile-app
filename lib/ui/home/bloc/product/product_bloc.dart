@@ -7,6 +7,7 @@ import 'package:meta/meta.dart';
 import 'package:wisata_app/core/utils/either.dart';
 import 'package:wisata_app/data/datasources/product_local_datasource.dart';
 import 'package:wisata_app/data/datasources/product_remote_datasource.dart';
+import 'package:wisata_app/data/models/request/create_ticket_request_model.dart';
 import 'package:wisata_app/data/models/response/product_response_model.dart';
 
 part 'product_event.dart';
@@ -14,7 +15,10 @@ part 'product_state.dart';
 
 class ProductBloc extends Bloc<ProductEvent, ProductState> {
   ProductBloc(this._remote, this._local) : super(const ProductState()) {
-    on<ProductSynced>(_onSynced, transformer: droppable());
+    on<ProductSynced>(_onSynced, transformer: sequential());
+    on<ProductCreate>(_onCreate, transformer: sequential());
+    on<ProductUpdate>(_onUpdate, transformer: sequential());
+    on<ProductDelete>(_onDelete, transformer: sequential());
     on<ProductLocalFetched>(_onLocalFetched, transformer: restartable());
     _watchConnectivity();
   }
@@ -88,13 +92,7 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
           );
         }
       case Right(:final value):
-        final categories = {
-          for (final p in value)
-            if (p.category?.id != null) p.category!.id!: p.category!,
-        }.values.toList();
-
         await _local.removeAllProduct();
-        await _local.insertAllCategory(categories);
         await _local.insertAllProduct(value);
 
         emit(
@@ -105,6 +103,48 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
             isSyncing: false,
           ),
         );
+    }
+  }
+
+  Future<void> _onCreate(
+    ProductCreate event,
+    Emitter<ProductState> emit,
+  ) async {
+    final result = await _remote.createProduct(event.data);
+
+    switch (result) {
+      case Left(:final value):
+        emit(state.copyWith(status: ProductStatus.failure, message: value));
+      case Right():
+        add(ProductSynced());
+    }
+  }
+
+  Future<void> _onUpdate(
+    ProductUpdate event,
+    Emitter<ProductState> emit,
+  ) async {
+    final result = await _remote.updateProduct(event.data, event.id);
+
+    switch (result) {
+      case Left(:final value):
+        emit(state.copyWith(status: ProductStatus.failure, message: value));
+      case Right():
+        add(ProductSynced());
+    }
+  }
+
+  Future<void> _onDelete(
+    ProductDelete event,
+    Emitter<ProductState> emit,
+  ) async {
+    final result = await _remote.deleteProduct(event.id);
+
+    switch (result) {
+      case Left(:final value):
+        emit(state.copyWith(status: ProductStatus.failure, message: value));
+      case Right():
+        add(ProductSynced());
     }
   }
 }

@@ -52,6 +52,8 @@ dependencies:
   connectivity_plus: ^7.3.2
   print_bluetooth_thermal: ^1.2.5
   esc_pos_utils_plus: ^2.0.4
+  toastification: ^3.2.0
+  dropdown_search: 6.0.2
 
 dev_dependencies:
   flutter_test:

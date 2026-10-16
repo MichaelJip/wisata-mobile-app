@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:wisata_app/core/core.dart';
+import 'package:wisata_app/ui/home/bloc/category/category_bloc.dart';
 import 'package:wisata_app/ui/home/bloc/checkout/checkout_bloc.dart';
 import 'package:wisata_app/ui/home/bloc/product/product_bloc.dart';
 import 'package:wisata_app/ui/home/pages/order_detail_page.dart';
@@ -14,6 +15,8 @@ class OrderPage extends StatefulWidget {
 }
 
 class _OrderPageState extends State<OrderPage> {
+  int? _selectedCategoryId;
+
   Future<void> _refresh() {
     final bloc = context.read<ProductBloc>();
     bloc.add(ProductSynced());
@@ -55,6 +58,40 @@ class _OrderPageState extends State<OrderPage> {
               return const SizedBox.shrink();
             },
           ),
+          BlocBuilder<CategoryBloc, CategoryState>(
+            buildWhen: (previous, current) =>
+                previous.categories != current.categories,
+            builder: (context, state) {
+              if (state.categories.isEmpty) return const SizedBox.shrink();
+              return SizedBox(
+                height: 48,
+                child: ListView(
+                  scrollDirection: Axis.horizontal,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20.0,
+                    vertical: 6.0,
+                  ),
+                  children: [
+                    ChoiceChip(
+                      label: const Text('Semua'),
+                      selected: _selectedCategoryId == null,
+                      onSelected: (_) =>
+                          setState(() => _selectedCategoryId = null),
+                    ),
+                    for (final category in state.categories) ...[
+                      const SizedBox(width: 8),
+                      ChoiceChip(
+                        label: Text(category.name ?? '-'),
+                        selected: _selectedCategoryId == category.id,
+                        onSelected: (_) =>
+                            setState(() => _selectedCategoryId = category.id),
+                      ),
+                    ],
+                  ],
+                ),
+              );
+            },
+          ),
           Expanded(
             child: BlocBuilder<ProductBloc, ProductState>(
               builder: (context, state) {
@@ -92,15 +129,35 @@ class _OrderPageState extends State<OrderPage> {
                   );
                 }
 
+                final products = _selectedCategoryId == null
+                    ? state.products
+                    : state.products
+                          .where((p) => p.categoryId == _selectedCategoryId)
+                          .toList();
+
                 return RefreshIndicator(
                   onRefresh: _refresh,
-                  child: ListView.builder(
-                    physics: const AlwaysScrollableScrollPhysics(),
-                    padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                    itemCount: state.products.length,
-                    itemBuilder: (context, index) =>
-                        OrderCard(item: state.products[index]),
-                  ),
+                  child: products.isEmpty
+                      ? ListView(
+                          physics: const AlwaysScrollableScrollPhysics(),
+                          children: const [
+                            SizedBox(
+                              height: 300,
+                              child: Center(
+                                child: Text('Tidak ada tiket di kategori ini'),
+                              ),
+                            ),
+                          ],
+                        )
+                      : ListView.separated(
+                          physics: const AlwaysScrollableScrollPhysics(),
+                          padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                          separatorBuilder: (context, index) =>
+                              const SpaceHeight(12.0),
+                          itemCount: products.length,
+                          itemBuilder: (context, index) =>
+                              OrderCard(item: products[index]),
+                        ),
                 );
               },
             ),

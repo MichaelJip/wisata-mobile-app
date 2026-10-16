@@ -5,7 +5,7 @@ const List<String> _dayNames = [
   'Rabu',
   'Kamis',
   'Jumat',
-  'Sabtu'
+  'Sabtu',
 ];
 
 const List<String> _monthNames = [
@@ -20,7 +20,7 @@ const List<String> _monthNames = [
   'September',
   'Oktober',
   'November',
-  'Desember'
+  'Desember',
 ];
 
 extension DateTimeExt on DateTime {

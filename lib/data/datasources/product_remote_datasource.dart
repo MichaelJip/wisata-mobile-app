@@ -1,6 +1,8 @@
 import 'package:dio/dio.dart';
 import 'package:wisata_app/core/utils/dio_error_message.dart';
 import 'package:wisata_app/core/utils/either.dart';
+import 'package:wisata_app/data/models/request/create_ticket_request_model.dart';
+import 'package:wisata_app/data/models/response/create_ticket_response_model.dart';
 import 'package:wisata_app/data/models/response/product_response_model.dart';
 
 class ProductRemoteDatasource {
@@ -50,6 +52,44 @@ class ProductRemoteDatasource {
           }
         }
         return Right(items);
+    }
+  }
+
+  Future<Either<String, TicketResponsePostModel>> createProduct(
+    CreateTicketRequestModel data,
+  ) async {
+    try {
+      final response = await _dio.post('/product', data: data.toMap());
+      return Right(TicketResponsePostModel.fromJson(response.data));
+    } on DioException catch (e) {
+      return Left(dioErrorMessage(e));
+    } catch (e) {
+      return Left(e.toString());
+    }
+  }
+
+  Future<Either<String, TicketResponsePostModel>> updateProduct(
+    CreateTicketRequestModel data,
+    int id,
+  ) async {
+    try {
+      final response = await _dio.patch('/product/$id', data: data.toMap());
+      return Right(TicketResponsePostModel.fromJson(response.data));
+    } on DioException catch (e) {
+      return Left(dioErrorMessage(e));
+    } catch (e) {
+      return Left(e.toString());
+    }
+  }
+
+  Future<Either<String, String>> deleteProduct(int id) async {
+    try {
+      await _dio.delete('/product/$id');
+      return Right("Success");
+    } on DioException catch (e) {
+      return Left(dioErrorMessage(e));
+    } catch (e) {
+      return Left(e.toString());
     }
   }
 }
